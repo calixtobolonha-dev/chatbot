@@ -39,6 +39,7 @@ Sempre leia esse arquivo antes de programar qualquer coisa ligada ao TimeTrack o
 
 ## Git
 
+- Todo commit segue a skill `.claude/skills/commits/SKILL.md`: leia antes de fazer qualquer commit.
 - Sempre que o usuário autorizar uma alteração, depois do commit e push no branch de trabalho,
   levar o commit também para a `main` (fast-forward, sem commit de merge).
 - Se a `main` tiver recebido alterações por fora, parar e avisar o usuário antes de qualquer coisa.
