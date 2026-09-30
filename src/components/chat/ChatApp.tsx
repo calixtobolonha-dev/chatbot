@@ -46,7 +46,7 @@ export function ChatApp() {
     () => conversations[0].id,
   );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  // Texto do campo de busca de atendimentos (telefone, nome, email ou protocolo)
+  // Texto do campo de busca de atendimentos (telefone, nome, email, protocolo ou tag)
   const [searchQuery, setSearchQuery] = useState("");
   // Conversas que estão aguardando a resposta do atendente
   const [typingConversationIds, setTypingConversationIds] = useState<Set<string>>(

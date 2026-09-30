@@ -3,12 +3,12 @@ interface ConversationSearchProps {
   onChange: (value: string) => void;
 }
 
-// Campo único para buscar atendimentos por telefone, nome do cliente, email ou protocolo
+// Campo único para buscar atendimentos por telefone, nome do cliente, email, protocolo ou tag
 export function ConversationSearch({ value, onChange }: ConversationSearchProps) {
   return (
     <div className="relative">
       <label htmlFor="conversation-search" className="sr-only">
-        Buscar atendimentos por telefone, nome, email ou protocolo
+        Buscar atendimentos por telefone, nome, email, protocolo ou tag
       </label>
       <svg
         viewBox="0 0 24 24"
@@ -29,7 +29,9 @@ export function ConversationSearch({ value, onChange }: ConversationSearchProps)
         onKeyDown={(event) => {
           if (event.key === "Escape") onChange("");
         }}
-        placeholder="Telefone, nome, email ou protocolo"
+        // "Cliente" cobre nome e email; o texto completo aparece ao passar o mouse
+        placeholder="Cliente, telefone, protocolo ou tag"
+        title="Busque por nome, email, telefone, protocolo ou tag"
         autoComplete="off"
         // Só reserva espaço à direita quando o botão de limpar aparece, para caber o texto de ajuda
         className={`w-full rounded-xs border border-borda bg-superficie py-2 pl-9 text-[13px] text-tinta ${
