@@ -3,18 +3,18 @@ import type { Category } from "@/types/chat";
 interface CategoryStyle {
   label: string;
   // Classes completas (sem montar strings), para o Tailwind encontrar na hora do build.
-  // Cores claras sobre fundo translúcido, para manter contraste no tema escuro.
+  // As cores vêm de tokens que mudam com o tema, para manter o contraste nos dois.
   className: string;
 }
 
 export const CATEGORY_STYLES: Record<Category, CategoryStyle> = {
   acesso: {
     label: "acesso",
-    className: "bg-amarelo/10 text-amarelo ring-amarelo/30",
+    className: "bg-etiqueta-acesso/10 text-etiqueta-acesso ring-etiqueta-acesso/30",
   },
   dados: {
     label: "dados",
-    className: "bg-sky-300/10 text-sky-300 ring-sky-300/30",
+    className: "bg-etiqueta-dados/10 text-etiqueta-dados ring-etiqueta-dados/30",
   },
   integracao: {
     label: "integração",

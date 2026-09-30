@@ -1,10 +1,57 @@
 @import "tailwindcss";
 
 /*
-  Tokens do design system Grupo Lima (tema escuro).
+  Tokens do design system Grupo Lima, com tema escuro (padrão) e tema claro.
   Fonte: artefato "Grupo Lima" (Design System) no Claude.
   Use sempre as classes geradas (bg-roxo, text-tinta, rounded-xs...), nunca hex soltos.
+
+  Como funciona o tema:
+  - as cores que mudam entre os temas ficam em variáveis (--tinta, --superficie...);
+  - o atributo data-theme="light" ou "dark" no <html> escolhe os valores;
+  - o @theme inline abaixo liga essas variáveis às classes do Tailwind.
 */
+
+/* Tema escuro (padrão) */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --texto-marca: #c77ddb;
+  --tinta: #f8f8f8;
+  --tinta-suave: #aaaeb4;
+  --superficie: #0b0d12;
+  --superficie-card: #13161b;
+  --superficie-suave: #23272b;
+  --borda: #ffffff1a;
+  --perigo: #ff6367;
+  --sucesso: #34c58e;
+  --sombra-card: 0 8px 30px rgba(0, 0, 0, 0.45);
+
+  /* Tokens do próprio chatbot (não existem no design system) */
+  --balao-atendente: #000000;
+  --etiqueta-acesso: #fad220;
+  --etiqueta-dados: #7dd3fc;
+}
+
+/* Tema claro: fundo branco e texto escuro */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --texto-marca: #6b0384;
+  --tinta: #13161b;
+  --tinta-suave: #515963;
+  --superficie: #ffffff;
+  --superficie-card: #ffffff;
+  --superficie-suave: #f6f5ee;
+  --borda: #e0e5eb;
+  --perigo: #df2321;
+  --sucesso: #009767;
+  --sombra-card: 0 8px 30px rgba(0, 0, 0, 0.08);
+
+  --balao-atendente: #f6f5ee;
+  /* Amarelo e azul claros somem no branco: versões escuras para manter a leitura */
+  --etiqueta-acesso: #7a5c00;
+  --etiqueta-dados: #0369a1;
+}
+
 @theme {
   /* Marca: iguais nos dois temas */
   --color-roxo: #6b0384;
@@ -15,30 +62,30 @@
   --color-on-amarelo: #373737;
   --color-on-roxo: #ffffff;
 
-  /* Neutros e texto (valores do tema escuro) */
-  --color-texto-marca: #c77ddb;
-  --color-tinta: #f8f8f8;
-  --color-tinta-suave: #aaaeb4;
-  --color-superficie: #0b0d12;
-  --color-superficie-card: #13161b;
-  --color-superficie-suave: #23272b;
-  --color-borda: #ffffff1a;
-
-  /* Estados */
-  --color-perigo: #ff6367;
-  --color-sucesso: #34c58e;
-
   /* Raios: ações quase retas, cartões macios */
   --radius-xs: 2px;
   --radius-sm: 9.6px;
   --radius-md: 12.8px;
   --radius-lg: 16px;
   --radius-xl: 22.4px;
-
-  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.45);
 }
 
+/* Cores que dependem do tema: apontam para as variáveis definidas acima */
 @theme inline {
+  --color-texto-marca: var(--texto-marca);
+  --color-tinta: var(--tinta);
+  --color-tinta-suave: var(--tinta-suave);
+  --color-superficie: var(--superficie);
+  --color-superficie-card: var(--superficie-card);
+  --color-superficie-suave: var(--superficie-suave);
+  --color-borda: var(--borda);
+  --color-perigo: var(--perigo);
+  --color-sucesso: var(--sucesso);
+  --color-balao-atendente: var(--balao-atendente);
+  --color-etiqueta-acesso: var(--etiqueta-acesso);
+  --color-etiqueta-dados: var(--etiqueta-dados);
+  --shadow-card: var(--sombra-card);
+
   --font-sans: var(--font-sora);
   --font-mono: var(--font-geist-mono);
 }
@@ -46,13 +93,18 @@
 /* Na camada base, para que utilitários como focus:outline-none continuem valendo */
 @layer base {
   body {
-    background-color: var(--color-superficie);
-    color: var(--color-tinta);
+    background-color: var(--superficie);
+    color: var(--tinta);
   }
 
   /* Foco do design system: anel amarelo-claro de 2px com afastamento */
   :focus-visible {
     outline: 2px solid var(--color-amarelo-claro);
     outline-offset: 2px;
+  }
+
+  /* No fundo claro o amarelo quase some: o design system pede um contorno roxo junto */
+  :root[data-theme="light"] :focus-visible {
+    box-shadow: 0 0 0 2px var(--color-roxo);
   }
 }

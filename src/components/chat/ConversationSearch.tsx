@@ -31,7 +31,10 @@ export function ConversationSearch({ value, onChange }: ConversationSearchProps)
         }}
         placeholder="Telefone, nome, email ou protocolo"
         autoComplete="off"
-        className="w-full rounded-xs border border-borda bg-superficie py-2 pl-9 pr-9 text-sm text-tinta placeholder:text-tinta-suave focus:border-texto-marca/60 [&::-webkit-search-cancel-button]:hidden"
+        // Só reserva espaço à direita quando o botão de limpar aparece, para caber o texto de ajuda
+        className={`w-full rounded-xs border border-borda bg-superficie py-2 pl-9 text-[13px] text-tinta ${
+          value === "" ? "pr-2" : "pr-9"
+        } placeholder:text-tinta-suave focus:border-texto-marca/60 [&::-webkit-search-cancel-button]:hidden`}
       />
       {value !== "" && (
         <button

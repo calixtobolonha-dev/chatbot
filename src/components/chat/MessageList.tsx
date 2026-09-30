@@ -25,7 +25,7 @@ export function MessageList({ messages, isAssistantTyping }: MessageListProps) {
 
       {isAssistantTyping && (
         <div className="flex justify-start" aria-live="polite">
-          <div className="flex items-center gap-1 rounded-lg rounded-bl-xs border border-borda bg-black px-4 py-3">
+          <div className="flex items-center gap-1 rounded-lg rounded-bl-xs border border-borda bg-balao-atendente px-4 py-3">
             <span className="sr-only">O atendente está digitando</span>
             <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-tinta-suave [animation-delay:-0.3s]" />
             <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-tinta-suave [animation-delay:-0.15s]" />

@@ -1,5 +1,6 @@
 import type { Conversation } from "@/types/chat";
 import { CategoryBadge } from "./CategoryBadge";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface ChatHeaderProps {
   conversation: Conversation;
@@ -40,6 +41,8 @@ export function ChatHeader({ conversation, onOpenSidebar }: ChatHeaderProps) {
           )}
         </p>
       </div>
+
+      <ThemeToggle />
     </header>
   );
 }

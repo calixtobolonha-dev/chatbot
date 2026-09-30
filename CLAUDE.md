@@ -13,9 +13,12 @@ Desenvolvimento Web com Claude.
 
 ## Visual
 
-- Segue o design system Grupo Lima (tema escuro): roxo é a marca, amarelo é a ação, fonte Sora.
-- Os tokens ficam em `src/app/globals.css` (`@theme`). Use as classes geradas (`bg-roxo`,
+- Segue o design system Grupo Lima: roxo é a marca, amarelo é a ação, fonte Sora.
+- Tem tema escuro (padrão) e tema claro, trocados pelo botão no topo da conversa.
+- Os tokens ficam em `src/app/globals.css`. Use as classes geradas (`bg-roxo`,
   `text-tinta`, `rounded-xs`...), nunca cores hex soltas nem a paleta padrão do Tailwind.
+- Cor nova que muda com o tema: crie a variável nos dois blocos de tema em `globals.css`
+  e ligue no `@theme inline`. Confira a leitura da tela nos dois temas.
 - Botões de ação: `bg-amarelo text-on-amarelo rounded-xs`. Nunca texto branco sobre amarelo.
 - O logo (em `public/brand/`) é amarelo e só pode ficar sobre fundo roxo.
 
