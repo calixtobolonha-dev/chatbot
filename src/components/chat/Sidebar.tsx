@@ -1,9 +1,13 @@
 import Image from "next/image";
 import type { Conversation } from "@/types/chat";
 import { ConversationListItem } from "./ConversationListItem";
+import { ConversationSearch } from "./ConversationSearch";
 
 interface SidebarProps {
+  // Já filtradas pela busca
   conversations: Conversation[];
+  searchQuery: string;
+  onSearchQueryChange: (query: string) => void;
   activeConversationId: string;
   now: Date | null;
   // Só tem efeito no celular, onde a lista vira uma gaveta
@@ -15,6 +19,8 @@ interface SidebarProps {
 
 export function Sidebar({
   conversations,
+  searchQuery,
+  onSearchQueryChange,
   activeConversationId,
   now,
   isOpen,
@@ -64,7 +70,7 @@ export function Sidebar({
           </button>
         </div>
 
-        <div className="px-4 py-3">
+        <div className="space-y-3 px-4 py-3">
           <button
             type="button"
             onClick={onNewConversation}
@@ -72,9 +78,15 @@ export function Sidebar({
           >
             + Nova conversa
           </button>
+          <ConversationSearch value={searchQuery} onChange={onSearchQueryChange} />
         </div>
 
         <nav aria-label="Conversas" className="flex-1 space-y-1 overflow-y-auto px-2 pb-4">
+          {conversations.length === 0 && (
+            <p className="px-3 py-6 text-center text-sm text-tinta-suave">
+              Nenhum atendimento encontrado.
+            </p>
+          )}
           {conversations.map((conversation) => (
             <ConversationListItem
               key={conversation.id}

@@ -14,6 +14,8 @@ interface SampleConversation {
   title: string;
   personName: string;
   personEmail: string;
+  personPhone: string;
+  protocol: string;
   category: Category;
   messages: SampleMessage[];
 }
@@ -24,6 +26,8 @@ const SAMPLE_CONVERSATIONS: SampleConversation[] = [
     title: "Não consigo entrar no sistema",
     personName: "João Pereira",
     personEmail: "joao@empresa.com",
+    personPhone: "(27) 99812-3456",
+    protocol: "TT-2026-001523",
     category: "acesso",
     messages: [
       { author: "user", text: "Oi, não consigo logar desde hoje cedo.", minutesAgo: 9 },
@@ -36,6 +40,8 @@ const SAMPLE_CONVERSATIONS: SampleConversation[] = [
     title: "Horas de março com diferença",
     personName: "Maria Costa",
     personEmail: "maria.costa@techcorp.com",
+    personPhone: "(27) 98845-1207",
+    protocol: "TT-2026-001518",
     category: "dados",
     messages: [
       { author: "user", text: "O banco de horas de março mostra 12 horas a menos para a minha equipe.", minutesAgo: 70 },
@@ -47,6 +53,8 @@ const SAMPLE_CONVERSATIONS: SampleConversation[] = [
     title: "Integração com a folha de pagamento",
     personName: "Rafael Souza",
     personEmail: "rafael.souza@logistica-sul.com.br",
+    personPhone: "(28) 99931-7740",
+    protocol: "TT-2026-001502",
     category: "integracao",
     messages: [
       { author: "user", text: "A exportação para o sistema de folha parou de funcionar ontem à noite.", minutesAgo: 60 * 5 },
@@ -59,6 +67,8 @@ const SAMPLE_CONVERSATIONS: SampleConversation[] = [
     title: "Email de confirmação não chegou",
     personName: "Pedro Santos",
     personEmail: "pedro@startup.io",
+    personPhone: "(33) 98712-5589",
+    protocol: "TT-2026-001487",
     category: "duvida",
     messages: [
       { author: "user", text: "Criei minha conta mas o email de confirmação nunca chegou. O que faço?", minutesAgo: 60 * 26 },
@@ -70,6 +80,8 @@ const SAMPLE_CONVERSATIONS: SampleConversation[] = [
     title: "Aplicativo fecha sozinho",
     personName: "Marina Costa",
     personEmail: "marina@empresa.com",
+    personPhone: "(27) 99654-0031",
+    protocol: "TT-2026-001455",
     category: "bug",
     messages: [
       { author: "user", text: "O app fecha sozinho quando tento bater o ponto de saída.", minutesAgo: 60 * 24 * 2 },
@@ -82,6 +94,8 @@ const SAMPLE_CONVERSATIONS: SampleConversation[] = [
     title: "Exportar relatório em planilha",
     personName: "Lucas Martins",
     personEmail: "lucas.martins@supermercadobom.com.br",
+    personPhone: "(33) 99108-2264",
+    protocol: "TT-2026-001431",
     category: "feature",
     messages: [
       { author: "user", text: "Seria ótimo poder exportar o relatório mensal direto para planilha.", minutesAgo: 60 * 24 * 4 },
@@ -109,6 +123,8 @@ export function createSampleConversations(now: Date): Conversation[] {
       title: sample.title,
       personName: sample.personName,
       personEmail: sample.personEmail,
+      personPhone: sample.personPhone,
+      protocol: sample.protocol,
       category: sample.category,
       messages,
       createdAt: messages[0]?.sentAt ?? now.toISOString(),

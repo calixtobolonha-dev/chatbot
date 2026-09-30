@@ -7,6 +7,11 @@ interface ChatHeaderProps {
 }
 
 export function ChatHeader({ conversation, onOpenSidebar }: ChatHeaderProps) {
+  // Nome, email e telefone do cliente, pulando o que não existir
+  const contactDetails = [conversation.personName, conversation.personEmail, conversation.personPhone]
+    .filter((detail) => detail !== null)
+    .join(" · ");
+
   return (
     <header className="flex h-16 shrink-0 items-center gap-3 border-b border-borda bg-superficie-card px-4">
       {/* Botão de menu: só aparece no celular, para abrir a gaveta de conversas */}
@@ -29,9 +34,10 @@ export function ChatHeader({ conversation, onOpenSidebar }: ChatHeaderProps) {
           {conversation.category && <CategoryBadge category={conversation.category} />}
         </div>
         <p className="truncate text-xs text-tinta-suave">
-          {conversation.personEmail
-            ? `${conversation.personName} · ${conversation.personEmail}`
-            : conversation.personName}
+          {contactDetails}
+          {conversation.protocol && (
+            <span className="font-mono"> · {conversation.protocol}</span>
+          )}
         </p>
       </div>
     </header>

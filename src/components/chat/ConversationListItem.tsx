@@ -40,9 +40,12 @@ export function ConversationListItem({
         </span>
       </div>
       <p className="mt-1 truncate text-sm text-tinta-suave">{preview}</p>
-      {conversation.category && (
-        <div className="mt-2">
-          <CategoryBadge category={conversation.category} />
+      {(conversation.category || conversation.protocol) && (
+        <div className="mt-2 flex items-center justify-between gap-2">
+          {conversation.category ? <CategoryBadge category={conversation.category} /> : <span />}
+          {conversation.protocol && (
+            <span className="font-mono text-[11px] text-tinta-suave">{conversation.protocol}</span>
+          )}
         </div>
       )}
     </button>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createSampleConversations } from "@/lib/conversas-exemplo";
+import { filterConversations } from "@/lib/filter-conversations";
 import type { Conversation, Message, MessageAuthor } from "@/types/chat";
 import { ChatHeader } from "./ChatHeader";
 import { EmptyState } from "./EmptyState";
@@ -45,6 +46,8 @@ export function ChatApp() {
     () => conversations[0].id,
   );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  // Texto do campo de busca de atendimentos (telefone, nome ou protocolo)
+  const [searchQuery, setSearchQuery] = useState("");
   // Conversas que estão aguardando a resposta do atendente
   const [typingConversationIds, setTypingConversationIds] = useState<Set<string>>(
     () => new Set(),
@@ -68,6 +71,11 @@ export function ChatApp() {
   const sortedConversations = useMemo(
     () => [...conversations].sort((a, b) => lastActivityTime(b) - lastActivityTime(a)),
     [conversations],
+  );
+
+  const visibleConversations = useMemo(
+    () => filterConversations(sortedConversations, searchQuery),
+    [sortedConversations, searchQuery],
   );
 
   const activeConversation =
@@ -127,6 +135,8 @@ export function ChatApp() {
         title: NEW_CONVERSATION_TITLE,
         personName: "Você",
         personEmail: null,
+        personPhone: null,
+        protocol: null,
         category: null,
         messages: [],
         createdAt: new Date().toISOString(),
@@ -148,7 +158,9 @@ export function ChatApp() {
   return (
     <div className="flex h-dvh overflow-hidden bg-superficie text-tinta">
       <Sidebar
-        conversations={sortedConversations}
+        conversations={visibleConversations}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
         activeConversationId={activeConversation.id}
         now={now}
         isOpen={isSidebarOpen}
