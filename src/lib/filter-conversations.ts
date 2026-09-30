@@ -12,6 +12,7 @@ function onlyDigits(text: string): string {
 /*
   Filtra os atendimentos por um único texto de busca, que pode ser:
   - nome do cliente ("joao", "Maria Costa");
+  - email do cliente, completo ou em parte ("joao@empresa.com", "techcorp");
   - protocolo, completo ou em parte ("TT-2026-001523", "1523");
   - telefone, com ou sem formatação ("(27) 99812-3456", "998123456").
   Busca só com números compara apenas os dígitos, para ignorar parênteses, espaços e hífens.
@@ -25,11 +26,14 @@ export function filterConversations(conversations: Conversation[], query: string
 
   return conversations.filter((conversation) => {
     const nameMatches = normalizeText(conversation.personName).includes(normalizedQuery);
+    const emailMatches =
+      conversation.personEmail !== null &&
+      normalizeText(conversation.personEmail).includes(normalizedQuery);
     const protocolMatches =
       conversation.protocol !== null &&
       normalizeText(conversation.protocol).includes(normalizedQuery);
 
-    if (nameMatches || protocolMatches) return true;
+    if (nameMatches || emailMatches || protocolMatches) return true;
     if (!isNumericQuery) return false;
 
     const phoneDigits = onlyDigits(conversation.personPhone ?? "");
