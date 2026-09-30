@@ -25,21 +25,21 @@ export function ConversationListItem({
       type="button"
       onClick={() => onSelect(conversation.id)}
       aria-current={isActive ? "true" : undefined}
-      className={`w-full rounded-lg border px-3 py-3 text-left transition-colors ${
+      className={`w-full rounded-md px-3 py-3 text-left transition-colors ${
         isActive
-          ? "border-teal-500/40 bg-teal-500/10"
-          : "border-transparent hover:bg-zinc-800/60"
+          ? "bg-superficie-suave ring-1 ring-inset ring-texto-marca/40"
+          : "hover:bg-superficie-suave/60"
       }`}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="truncate text-sm font-medium text-zinc-100">
+        <span className="truncate text-sm font-semibold text-tinta">
           {conversation.personName}
         </span>
-        <span className="shrink-0 text-xs text-zinc-500">
+        <span className="shrink-0 text-xs text-tinta-suave">
           {now ? formatRelativeTime(lastActivity, now) : ""}
         </span>
       </div>
-      <p className="mt-1 truncate text-sm text-zinc-400">{preview}</p>
+      <p className="mt-1 truncate text-sm text-tinta-suave">{preview}</p>
       {conversation.category && (
         <div className="mt-2">
           <CategoryBadge category={conversation.category} />

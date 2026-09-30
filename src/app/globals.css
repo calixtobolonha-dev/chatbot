@@ -1,11 +1,58 @@
 @import "tailwindcss";
 
+/*
+  Tokens do design system Grupo Lima (tema escuro).
+  Fonte: artefato "Grupo Lima" (Design System) no Claude.
+  Use sempre as classes geradas (bg-roxo, text-tinta, rounded-xs...), nunca hex soltos.
+*/
+@theme {
+  /* Marca: iguais nos dois temas */
+  --color-roxo: #6b0384;
+  --color-roxo-escuro: #5d147b;
+  --color-roxo-profundo: #4b0070;
+  --color-amarelo: #fad220;
+  --color-amarelo-claro: #f7db4a;
+  --color-on-amarelo: #373737;
+  --color-on-roxo: #ffffff;
+
+  /* Neutros e texto (valores do tema escuro) */
+  --color-texto-marca: #c77ddb;
+  --color-tinta: #f8f8f8;
+  --color-tinta-suave: #aaaeb4;
+  --color-superficie: #0b0d12;
+  --color-superficie-card: #13161b;
+  --color-superficie-suave: #23272b;
+  --color-borda: #ffffff1a;
+
+  /* Estados */
+  --color-perigo: #ff6367;
+  --color-sucesso: #34c58e;
+
+  /* Raios: ações quase retas, cartões macios */
+  --radius-xs: 2px;
+  --radius-sm: 9.6px;
+  --radius-md: 12.8px;
+  --radius-lg: 16px;
+  --radius-xl: 22.4px;
+
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
 @theme inline {
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sora);
   --font-mono: var(--font-geist-mono);
 }
 
-body {
-  background-color: var(--color-zinc-950);
-  color: var(--color-zinc-100);
+/* Na camada base, para que utilitários como focus:outline-none continuem valendo */
+@layer base {
+  body {
+    background-color: var(--color-superficie);
+    color: var(--color-tinta);
+  }
+
+  /* Foco do design system: anel amarelo-claro de 2px com afastamento */
+  :focus-visible {
+    outline: 2px solid var(--color-amarelo-claro);
+    outline-offset: 2px;
+  }
 }

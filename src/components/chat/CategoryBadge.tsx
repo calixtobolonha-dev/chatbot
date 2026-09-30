@@ -10,7 +10,7 @@ export function CategoryBadge({ category }: CategoryBadgeProps) {
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${style.className}`}
+      className={`inline-flex shrink-0 items-center rounded-xs px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ring-1 ring-inset ${style.className}`}
     >
       {style.label}
     </span>

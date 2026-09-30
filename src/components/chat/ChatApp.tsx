@@ -146,7 +146,7 @@ export function ChatApp() {
   const hasMessages = activeConversation.messages.length > 0;
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-zinc-950 text-zinc-100">
+    <div className="flex h-dvh overflow-hidden bg-superficie text-tinta">
       <Sidebar
         conversations={sortedConversations}
         activeConversationId={activeConversation.id}

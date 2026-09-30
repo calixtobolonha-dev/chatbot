@@ -44,8 +44,8 @@ export function MessageInput({ onSend }: MessageInputProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border-t border-zinc-800 px-4 py-3">
-      <div className="mx-auto flex w-full max-w-3xl items-end gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2 focus-within:border-teal-500/60">
+    <form onSubmit={handleSubmit} className="border-t border-borda bg-superficie px-4 py-3">
+      <div className="mx-auto flex w-full max-w-3xl items-end gap-2 rounded-md border border-borda bg-superficie-card p-2 focus-within:border-texto-marca/60">
         <label htmlFor="message-input" className="sr-only">
           Mensagem
         </label>
@@ -60,17 +60,17 @@ export function MessageInput({ onSend }: MessageInputProps) {
           onKeyDown={handleKeyDown}
           rows={1}
           placeholder="Digite sua mensagem..."
-          className="max-h-40 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+          className="max-h-40 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-tinta placeholder:text-tinta-suave focus:outline-none"
         />
         <button
           type="submit"
           disabled={!canSend}
-          className="rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-teal-400 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-xs bg-amarelo px-5 py-2 text-sm font-semibold text-on-amarelo transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45"
         >
           Enviar
         </button>
       </div>
-      <p className="mx-auto mt-1.5 hidden w-full max-w-3xl px-1 text-[11px] text-zinc-600 sm:block">
+      <p className="mx-auto mt-1.5 hidden w-full max-w-3xl px-1 text-[11px] text-tinta-suave sm:block">
         Enter envia. Shift+Enter quebra a linha.
       </p>
     </form>

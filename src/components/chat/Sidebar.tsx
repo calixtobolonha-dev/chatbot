@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Conversation } from "@/types/chat";
 import { ConversationListItem } from "./ConversationListItem";
 
@@ -29,27 +30,33 @@ export function Sidebar({
           type="button"
           aria-label="Fechar lista de conversas"
           onClick={onClose}
-          className="fixed inset-0 z-20 bg-black/60 md:hidden"
+          className="fixed inset-0 z-20 bg-black/70 md:hidden"
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-30 flex w-80 max-w-[85vw] flex-col border-r border-zinc-800 bg-zinc-900 transition-transform duration-200 md:static md:z-auto md:max-w-none md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-30 flex w-80 max-w-[85vw] flex-col border-r border-borda bg-superficie-card transition-transform duration-200 md:static md:z-auto md:max-w-none md:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between gap-2 border-b border-zinc-800 px-4 py-4">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500 text-sm font-bold text-zinc-950">
-              GL
-            </span>
-            <span className="text-base font-semibold text-zinc-100">Chatbot GL</span>
+        {/* Faixa roxa da marca: o logo amarelo só pode ficar sobre roxo */}
+        <div className="flex h-16 shrink-0 items-center justify-between gap-2 bg-roxo px-4 text-on-roxo">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/brand/grupo-lima-horizontal.png"
+              alt="Grupo Lima"
+              width={2057}
+              height={835}
+              priority
+              className="h-10 w-auto"
+            />
+            <span className="border-l border-on-roxo/30 pl-3 text-sm font-semibold">Chatbot GL</span>
           </div>
           <button
             type="button"
             aria-label="Fechar lista de conversas"
             onClick={onClose}
-            className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 md:hidden"
+            className="rounded-xs p-1.5 text-on-roxo hover:text-amarelo md:hidden"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
@@ -61,7 +68,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={onNewConversation}
-            className="w-full rounded-lg bg-teal-500 px-3 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-teal-400"
+            className="w-full rounded-xs bg-amarelo px-3 py-2.5 text-sm font-semibold text-on-amarelo transition-opacity hover:opacity-90"
           >
             + Nova conversa
           </button>
