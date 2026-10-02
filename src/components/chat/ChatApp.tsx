@@ -175,6 +175,11 @@ export function ChatApp() {
             ...message,
             text: message.text + chunk,
           })),
+        onTool: (tool) =>
+          updateMessage(conversationId, assistantMessage.id, (message) => ({
+            ...message,
+            tools: [...(message.tools ?? []), tool],
+          })),
       });
     } catch (error) {
       if (controller.signal.aborted) {
@@ -208,7 +213,10 @@ export function ChatApp() {
         return {
           ...conversation,
           messages: conversation.messages.map((message) =>
-            message.id === assistantMessageId ? { ...errorMessage, id: message.id } : message,
+            // Mantém os selos das ferramentas que já tinham sido usadas antes do erro
+            message.id === assistantMessageId
+              ? { ...errorMessage, id: message.id, tools: message.tools }
+              : message,
           ),
         };
       }

@@ -7,6 +7,14 @@ export type Category =
   | "bug"
   | "feature";
 
+// Ferramenta que o atendente usou durante a resposta, mostrada como selo acima do texto
+export interface ToolUse {
+  // Nome técnico enviado pelo cérebro, ex.: "consultar_usuario"
+  name: string;
+  // true se a ferramenta funcionou; false se deu erro
+  ok: boolean;
+}
+
 // Quem escreveu a mensagem: o cliente ou o atendente (bot)
 export type MessageAuthor = "user" | "assistant";
 
@@ -18,6 +26,8 @@ export interface Message {
   sentAt: string;
   // Mensagem de erro do atendimento, mostrada com fundo avermelhado e fora do histórico enviado
   isError?: boolean;
+  // Ferramentas usadas pelo atendente nesta resposta, na ordem em que chegaram
+  tools?: ToolUse[];
 }
 
 export interface Conversation {

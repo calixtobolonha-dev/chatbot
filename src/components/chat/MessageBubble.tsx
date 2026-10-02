@@ -1,4 +1,5 @@
 import type { Message } from "@/types/chat";
+import { ToolBadge } from "./ToolBadge";
 
 interface MessageBubbleProps {
   message: Message;
@@ -20,6 +21,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.author === "user";
   // Balão do atendente ainda vazio: a resposta está a caminho
   const isWaiting = !isUser && !message.isError && message.text === "";
+  const tools = message.tools ?? [];
 
   let bubbleStyle = "rounded-bl-xs border border-borda bg-balao-atendente text-tinta";
   if (isUser) bubbleStyle = "rounded-br-xs bg-roxo text-on-roxo";
@@ -31,6 +33,14 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         role={message.isError ? "alert" : undefined}
         className={`max-w-[85%] whitespace-pre-wrap break-words rounded-lg px-4 py-2.5 text-sm leading-relaxed sm:max-w-[70%] ${bubbleStyle}`}
       >
+        {tools.length > 0 && (
+          // Selos das ferramentas usadas, acima do texto da resposta
+          <div className="mb-2 flex flex-wrap gap-1.5 whitespace-normal">
+            {tools.map((tool, index) => (
+              <ToolBadge key={index} tool={tool} />
+            ))}
+          </div>
+        )}
         {isWaiting ? <TypingDots /> : message.text}
       </div>
     </div>

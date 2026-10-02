@@ -1,5 +1,7 @@
 // Conversa com a rota /api/chat e entrega a resposta do atendente aos pedaços.
 
+import type { ToolUse } from "@/types/chat";
+
 export interface ChatHistoryMessage {
   role: "user" | "assistant";
   content: string;
@@ -14,6 +16,7 @@ const EMPTY_REPLY_ERROR = "Não recebi resposta do atendimento. Tente enviar de 
 // Formato de cada linha "data: {...}" que a rota envia
 type ServerEvent =
   | { type: "text"; text: string }
+  | { type: "tool"; tool: ToolUse }
   | { type: "error"; message: string }
   | { type: "done" };
 
@@ -24,8 +27,10 @@ function parseServerEvent(line: string): ServerEvent | null {
     const event: unknown = JSON.parse(line.slice("data:".length).trim());
     if (typeof event !== "object" || event === null) return null;
 
-    const { type, text, message } = event as Record<string, unknown>;
+    const { type, text, message, nome, ok } = event as Record<string, unknown>;
     if (type === "text" && typeof text === "string") return { type, text };
+    // Aviso de ferramenta: data: {"type":"tool","nome":"consultar_usuario","ok":true}
+    if (type === "tool" && typeof nome === "string") return { type, tool: { name: nome, ok: ok === true } };
     if (type === "error") return { type, message: typeof message === "string" ? message : GENERIC_ERROR };
     if (type === "done") return { type };
   } catch {
@@ -38,16 +43,18 @@ interface StreamChatReplyOptions {
   messages: ChatHistoryMessage[];
   signal: AbortSignal;
   onText: (text: string) => void;
+  onTool: (tool: ToolUse) => void;
 }
 
 /*
-  Envia o histórico e chama onText para cada pedaço de texto que chegar.
+  Envia o histórico e chama onText para cada pedaço de texto que chegar
+  e onTool para cada ferramenta que o atendente usar.
   Os pedaços da rede podem cortar uma linha no meio, então o texto fica num buffer
   e só é processado quando a linha termina ("\n").
   Lança ChatReplyError com mensagem amigável quando algo dá errado.
   Se o signal for cancelado (botão Parar), o fetch lança AbortError, que o chamador trata.
 */
-export async function streamChatReply({ messages, signal, onText }: StreamChatReplyOptions): Promise<void> {
+export async function streamChatReply({ messages, signal, onText, onTool }: StreamChatReplyOptions): Promise<void> {
   let response: Response;
   try {
     response = await fetch("/api/chat", {
@@ -72,6 +79,8 @@ export async function streamChatReply({ messages, signal, onText }: StreamChatRe
     if (event?.type === "text") {
       receivedText = true;
       onText(event.text);
+    } else if (event?.type === "tool") {
+      onTool(event.tool);
     } else if (event?.type === "error") {
       throw new ChatReplyError(event.message);
     }
