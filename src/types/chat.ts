@@ -16,6 +16,8 @@ export interface Message {
   text: string;
   // Data em formato ISO, para ser fácil de serializar
   sentAt: string;
+  // Mensagem de erro do atendimento, mostrada com fundo avermelhado e fora do histórico enviado
+  isError?: boolean;
 }
 
 export interface Conversation {

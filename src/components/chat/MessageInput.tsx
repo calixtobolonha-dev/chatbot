@@ -4,15 +4,28 @@ import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
 // Altura máxima do campo antes de aparecer a barra de rolagem
 const MAX_TEXTAREA_HEIGHT_PX = 160;
+// A partir daqui a tela avisa que o texto está longo
+const LONG_TEXT_WARNING_LENGTH = 1000;
+// Limite aceito pela rota /api/chat; acima disso o envio fica bloqueado
+const MAX_TEXT_LENGTH = 4000;
 
 interface MessageInputProps {
   onSend: (text: string) => void;
+  onStop: () => void;
+  // Verdadeiro enquanto o atendente responde: o botão Enviar vira Parar
+  isResponding: boolean;
 }
 
-export function MessageInput({ onSend }: MessageInputProps) {
+function formatCount(value: number): string {
+  return value.toLocaleString("pt-BR");
+}
+
+export function MessageInput({ onSend, onStop, isResponding }: MessageInputProps) {
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const canSend = text.trim().length > 0;
+  const trimmedLength = text.trim().length;
+  const isTooLong = trimmedLength > MAX_TEXT_LENGTH;
+  const canSend = trimmedLength > 0 && !isTooLong && !isResponding;
 
   // Faz o campo crescer conforme o texto, até o limite
   function resizeTextarea() {
@@ -60,19 +73,45 @@ export function MessageInput({ onSend }: MessageInputProps) {
           onKeyDown={handleKeyDown}
           rows={1}
           placeholder="Digite sua mensagem..."
+          aria-describedby="message-length-warning"
           className="max-h-40 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-tinta placeholder:text-tinta-suave focus:outline-none"
         />
-        <button
-          type="submit"
-          disabled={!canSend}
-          className="rounded-xs bg-amarelo px-5 py-2 text-sm font-semibold text-on-amarelo transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45"
-        >
-          Enviar
-        </button>
+        {isResponding ? (
+          <button
+            type="button"
+            onClick={onStop}
+            className="rounded-xs border border-borda bg-superficie-suave px-5 py-2 text-sm font-semibold text-tinta transition-colors hover:border-perigo/60 hover:text-perigo"
+          >
+            Parar
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={!canSend}
+            className="rounded-xs bg-amarelo px-5 py-2 text-sm font-semibold text-on-amarelo transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            Enviar
+          </button>
+        )}
       </div>
-      <p className="mx-auto mt-1.5 hidden w-full max-w-3xl px-1 text-[11px] text-tinta-suave sm:block">
-        Enter envia. Shift+Enter quebra a linha.
-      </p>
+
+      <div id="message-length-warning" aria-live="polite" className="mx-auto w-full max-w-3xl px-1">
+        {isTooLong ? (
+          <p className="mt-1.5 text-xs text-perigo">
+            Seu texto tem {formatCount(trimmedLength)} caracteres. O limite é{" "}
+            {formatCount(MAX_TEXT_LENGTH)}: encurte para poder enviar.
+          </p>
+        ) : trimmedLength > LONG_TEXT_WARNING_LENGTH ? (
+          <p className="mt-1.5 text-xs text-etiqueta-acesso">
+            Seu texto tem {formatCount(trimmedLength)} caracteres. Mensagens curtas costumam ter
+            respostas melhores.
+          </p>
+        ) : (
+          <p className="mt-1.5 hidden text-[11px] text-tinta-suave sm:block">
+            Enter envia. Shift+Enter quebra a linha.
+          </p>
+        )}
+      </div>
     </form>
   );
 }

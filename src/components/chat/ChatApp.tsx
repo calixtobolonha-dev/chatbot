@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createSampleConversations } from "@/lib/conversas-exemplo";
+import { ChatReplyError, streamChatReply, type ChatHistoryMessage } from "@/lib/chat-stream";
+import { loadConversations, saveConversations } from "@/lib/conversation-storage";
 import { filterConversations } from "@/lib/filter-conversations";
 import type { Conversation, Message, MessageAuthor } from "@/types/chat";
 import { ChatHeader } from "./ChatHeader";
@@ -10,9 +11,6 @@ import { MessageInput } from "./MessageInput";
 import { MessageList } from "./MessageList";
 import { Sidebar } from "./Sidebar";
 
-// Resposta fixa enquanto o chatbot ainda não tem inteligência artificial
-const PLACEHOLDER_REPLY = "Ainda estou aprendendo a responder. No Dia 4 eu ganho um cérebro!";
-const REPLY_DELAY_MS = 500;
 const NEW_CONVERSATION_TITLE = "Nova conversa";
 const TITLE_MAX_LENGTH = 40;
 const CLOCK_REFRESH_MS = 60 * 1000;
@@ -25,9 +23,27 @@ function createMessage(author: MessageAuthor, text: string): Message {
   return { id: createId(), author, text, sentAt: new Date().toISOString() };
 }
 
+function createEmptyConversation(): Conversation {
+  return {
+    id: createId(),
+    title: NEW_CONVERSATION_TITLE,
+    personName: "Você",
+    personEmail: null,
+    personPhone: null,
+    protocol: null,
+    category: null,
+    messages: [],
+    createdAt: new Date().toISOString(),
+  };
+}
+
 function lastActivityTime(conversation: Conversation): number {
   const lastMessage = conversation.messages.at(-1);
   return new Date(lastMessage?.sentAt ?? conversation.createdAt).getTime();
+}
+
+function sortByLastActivity(conversations: Conversation[]): Conversation[] {
+  return [...conversations].sort((a, b) => lastActivityTime(b) - lastActivityTime(a));
 }
 
 // Usa o começo da primeira mensagem como título de uma conversa nova
@@ -38,23 +54,33 @@ function titleFromFirstMessage(text: string): string {
     : singleLine;
 }
 
+// Histórico enviado ao atendente: só mensagens de verdade, sem balões de erro ou vazios
+function toChatHistory(messages: Message[]): ChatHistoryMessage[] {
+  return messages
+    .filter((message) => !message.isError && message.text !== "")
+    .map((message) => ({ role: message.author, content: message.text }));
+}
+
 export function ChatApp() {
-  const [conversations, setConversations] = useState<Conversation[]>(() =>
-    createSampleConversations(new Date()),
-  );
+  const [conversations, setConversations] = useState<Conversation[]>(() => [
+    createEmptyConversation(),
+  ]);
   const [activeConversationId, setActiveConversationId] = useState<string>(
     () => conversations[0].id,
   );
+  // Só salva no navegador depois de ler o que já estava salvo, para não apagar nada
+  const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   // Texto do campo de busca de atendimentos (telefone, nome, email, protocolo ou tag)
   const [searchQuery, setSearchQuery] = useState("");
-  // Conversas que estão aguardando a resposta do atendente
-  const [typingConversationIds, setTypingConversationIds] = useState<Set<string>>(
+  // Conversas em que o atendente está respondendo agora
+  const [respondingConversationIds, setRespondingConversationIds] = useState<Set<string>>(
     () => new Set(),
   );
   // Relógio da tela: só existe no navegador, para o "há quanto tempo" não divergir do servidor
   const [now, setNow] = useState<Date | null>(null);
-  const replyTimeoutsRef = useRef<number[]>([]);
+  // Um controle de cancelamento por conversa respondendo (usado pelo botão Parar)
+  const abortControllersRef = useRef(new Map<string, AbortController>());
 
   useEffect(() => {
     setNow(new Date());
@@ -62,16 +88,28 @@ export function ChatApp() {
     return () => window.clearInterval(intervalId);
   }, []);
 
-  // Cancela respostas pendentes se o componente sair da tela
+  // Recupera as conversas salvas no navegador ao abrir a tela
   useEffect(() => {
-    const timeouts = replyTimeoutsRef.current;
-    return () => timeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    const stored = loadConversations();
+    if (stored && stored.length > 0) {
+      const sorted = sortByLastActivity(stored);
+      setConversations(sorted);
+      setActiveConversationId(sorted[0].id);
+    }
+    setIsStorageLoaded(true);
   }, []);
 
-  const sortedConversations = useMemo(
-    () => [...conversations].sort((a, b) => lastActivityTime(b) - lastActivityTime(a)),
-    [conversations],
-  );
+  useEffect(() => {
+    if (isStorageLoaded) saveConversations(conversations);
+  }, [conversations, isStorageLoaded]);
+
+  // Cancela as respostas em andamento se o componente sair da tela
+  useEffect(() => {
+    const controllers = abortControllersRef.current;
+    return () => controllers.forEach((controller) => controller.abort());
+  }, []);
+
+  const sortedConversations = useMemo(() => sortByLastActivity(conversations), [conversations]);
 
   const visibleConversations = useMemo(
     () => filterConversations(sortedConversations, searchQuery),
@@ -82,43 +120,104 @@ export function ChatApp() {
     conversations.find((conversation) => conversation.id === activeConversationId) ??
     conversations[0];
 
-  function appendMessage(conversationId: string, message: Message) {
+  function updateConversation(conversationId: string, update: (conversation: Conversation) => Conversation) {
     setConversations((current) =>
-      current.map((conversation) => {
-        if (conversation.id !== conversationId) return conversation;
-
-        const isFirstMessage = conversation.messages.length === 0;
-        return {
-          ...conversation,
-          title:
-            isFirstMessage && message.author === "user"
-              ? titleFromFirstMessage(message.text)
-              : conversation.title,
-          messages: [...conversation.messages, message],
-        };
-      }),
+      current.map((conversation) =>
+        conversation.id === conversationId ? update(conversation) : conversation,
+      ),
     );
   }
 
-  function setTyping(conversationId: string, isTyping: boolean) {
-    setTypingConversationIds((current) => {
+  function updateMessage(conversationId: string, messageId: string, update: (message: Message) => Message) {
+    updateConversation(conversationId, (conversation) => ({
+      ...conversation,
+      messages: conversation.messages.map((message) =>
+        message.id === messageId ? update(message) : message,
+      ),
+    }));
+  }
+
+  function setResponding(conversationId: string, isResponding: boolean) {
+    setRespondingConversationIds((current) => {
       const next = new Set(current);
-      if (isTyping) next.add(conversationId);
+      if (isResponding) next.add(conversationId);
       else next.delete(conversationId);
       return next;
     });
   }
 
-  function handleSend(text: string) {
+  async function handleSend(text: string) {
     const conversationId = activeConversation.id;
-    appendMessage(conversationId, createMessage("user", text));
-    setTyping(conversationId, true);
+    if (respondingConversationIds.has(conversationId)) return;
 
-    const timeoutId = window.setTimeout(() => {
-      appendMessage(conversationId, createMessage("assistant", PLACEHOLDER_REPLY));
-      setTyping(conversationId, false);
-    }, REPLY_DELAY_MS);
-    replyTimeoutsRef.current.push(timeoutId);
+    const userMessage = createMessage("user", text);
+    // Balão do atendente começa vazio e vai sendo preenchido a cada pedaço da resposta
+    const assistantMessage = createMessage("assistant", "");
+    const history = toChatHistory([...activeConversation.messages, userMessage]);
+
+    updateConversation(conversationId, (conversation) => ({
+      ...conversation,
+      title:
+        conversation.messages.length === 0 ? titleFromFirstMessage(text) : conversation.title,
+      messages: [...conversation.messages, userMessage, assistantMessage],
+    }));
+
+    const controller = new AbortController();
+    abortControllersRef.current.set(conversationId, controller);
+    setResponding(conversationId, true);
+
+    try {
+      await streamChatReply({
+        messages: history,
+        signal: controller.signal,
+        onText: (chunk) =>
+          updateMessage(conversationId, assistantMessage.id, (message) => ({
+            ...message,
+            text: message.text + chunk,
+          })),
+      });
+    } catch (error) {
+      if (controller.signal.aborted) {
+        // Parado pela pessoa: mantém o que já chegou e some com o balão se ainda estava vazio
+        updateConversation(conversationId, (conversation) => ({
+          ...conversation,
+          messages: conversation.messages.filter(
+            (message) => message.id !== assistantMessage.id || message.text !== "",
+          ),
+        }));
+      } else {
+        const errorText =
+          error instanceof ChatReplyError
+            ? error.message
+            : "Não consegui falar com o atendimento agora. Tente de novo em alguns instantes.";
+        showReplyError(conversationId, assistantMessage.id, errorText);
+      }
+    } finally {
+      abortControllersRef.current.delete(conversationId);
+      setResponding(conversationId, false);
+    }
+  }
+
+  // Mostra o erro no próprio balão se ele ainda estiver vazio; senão, num balão novo logo abaixo
+  function showReplyError(conversationId: string, assistantMessageId: string, errorText: string) {
+    updateConversation(conversationId, (conversation) => {
+      const assistantMessage = conversation.messages.find((message) => message.id === assistantMessageId);
+      const errorMessage: Message = { ...createMessage("assistant", errorText), isError: true };
+
+      if (assistantMessage && assistantMessage.text === "") {
+        return {
+          ...conversation,
+          messages: conversation.messages.map((message) =>
+            message.id === assistantMessageId ? { ...errorMessage, id: message.id } : message,
+          ),
+        };
+      }
+      return { ...conversation, messages: [...conversation.messages, errorMessage] };
+    });
+  }
+
+  function handleStop() {
+    abortControllersRef.current.get(activeConversation.id)?.abort();
   }
 
   function handleNewConversation() {
@@ -130,17 +229,7 @@ export function ChatApp() {
     if (existingEmpty) {
       setActiveConversationId(existingEmpty.id);
     } else {
-      const newConversation: Conversation = {
-        id: createId(),
-        title: NEW_CONVERSATION_TITLE,
-        personName: "Você",
-        personEmail: null,
-        personPhone: null,
-        protocol: null,
-        category: null,
-        messages: [],
-        createdAt: new Date().toISOString(),
-      };
+      const newConversation = createEmptyConversation();
       setConversations((current) => [newConversation, ...current]);
       setActiveConversationId(newConversation.id);
     }
@@ -175,18 +264,23 @@ export function ChatApp() {
           onOpenSidebar={() => setIsSidebarOpen(true)}
         />
 
+        <p className="shrink-0 border-b border-borda bg-superficie-suave px-4 py-1 text-center text-[11px] text-tinta-suave">
+          Modo treino: respostas do cérebro de treino do TimeTrack
+        </p>
+
         <div className="flex-1 overflow-y-auto">
           {hasMessages ? (
-            <MessageList
-              messages={activeConversation.messages}
-              isAssistantTyping={typingConversationIds.has(activeConversation.id)}
-            />
+            <MessageList messages={activeConversation.messages} />
           ) : (
             <EmptyState onSelectSuggestion={handleSend} />
           )}
         </div>
 
-        <MessageInput onSend={handleSend} />
+        <MessageInput
+          onSend={handleSend}
+          onStop={handleStop}
+          isResponding={respondingConversationIds.has(activeConversation.id)}
+        />
       </main>
     </div>
   );
