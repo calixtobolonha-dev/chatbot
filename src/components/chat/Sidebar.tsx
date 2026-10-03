@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Conversation } from "@/types/chat";
 import { ConversationListItem } from "./ConversationListItem";
 import { ConversationSearch } from "./ConversationSearch";
@@ -78,6 +79,12 @@ export function Sidebar({
           >
             + Nova conversa
           </button>
+          <Link
+            href="/campanhas"
+            className="block w-full rounded-xs border border-borda px-3 py-2 text-center text-sm font-semibold text-tinta transition-colors hover:bg-superficie-suave"
+          >
+            Campanhas
+          </Link>
           <ConversationSearch value={searchQuery} onChange={onSearchQueryChange} />
         </div>
 
